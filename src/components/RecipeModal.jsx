@@ -69,17 +69,27 @@ export default function RecipeModal({ recipe, onClose, onSave }) {
         await axios.post(`/api/recipes/${savedRecipe.id}/image`, formData)
       }
 
-      // Fetch OG image if auto tab and link provided
-      if (imageTab === 'auto' && linkUrl.trim()) {
+      // Auto image: try OG scrape first, then fall back to Pexels
+      if (imageTab === 'auto') {
+        let autoImageUrl = null
         try {
-          const { data: ogData } = await axios.get(
-            `/api/recipes/og-image?url=${encodeURIComponent(linkUrl.trim())}`
-          )
-          if (ogData.og_image_url) {
-            await axios.put(`/api/recipes/${savedRecipe.id}`, { image_url: ogData.og_image_url })
+          if (linkUrl.trim()) {
+            const { data: ogData } = await axios.get(
+              `/api/recipes/og-image?url=${encodeURIComponent(linkUrl.trim())}`
+            )
+            if (ogData.og_image_url) autoImageUrl = ogData.og_image_url
+          }
+          if (!autoImageUrl && name.trim()) {
+            const { data: pexelsData } = await axios.get(
+              `/api/recipes/search-image?q=${encodeURIComponent(name.trim())}`
+            )
+            if (pexelsData.image_url) autoImageUrl = pexelsData.image_url
+          }
+          if (autoImageUrl) {
+            await axios.put(`/api/recipes/${savedRecipe.id}`, { image_url: autoImageUrl })
           }
         } catch {
-          // silently ignore OG failures
+          // silently ignore
         }
       }
 
