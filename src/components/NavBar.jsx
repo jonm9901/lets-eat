@@ -60,7 +60,7 @@ export default function NavBar() {
 
           {/* Desktop nav links */}
           <div className="hidden sm:flex items-center gap-6">
-            <Link to="/library" style={linkStyle('/library')}>Library</Link>
+            <Link to="/library" style={linkStyle('/library')}>Home</Link>
             <Link to="/calendar" style={linkStyle('/calendar')}>Calendar</Link>
           </div>
 
@@ -100,7 +100,7 @@ export default function NavBar() {
 
         {/* Mobile nav links — second row */}
         <div className="sm:hidden flex gap-6 pb-2">
-          <Link to="/library" style={linkStyle('/library')}>Library</Link>
+          <Link to="/library" style={linkStyle('/library')}>Home</Link>
           <Link to="/calendar" style={linkStyle('/calendar')}>Calendar</Link>
         </div>
       </div>

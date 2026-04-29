@@ -3,6 +3,7 @@ import axios from 'axios'
 import { useAuth } from '../context/AuthContext'
 import RecipeCard from '../components/RecipeCard'
 import RecipeModal from '../components/RecipeModal'
+import ComingUp from '../components/ComingUp'
 
 function SkeletonCard() {
   return (
@@ -48,10 +49,13 @@ export default function Library() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
+      {/* Coming Up */}
+      <ComingUp />
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '2rem', margin: 0, color: '#1C1C1C' }}>
-          Recipe Library
+          Recipes
         </h1>
       </div>
 

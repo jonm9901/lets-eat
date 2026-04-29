@@ -50,10 +50,12 @@ async function setupDatabase() {
       id                  SERIAL PRIMARY KEY,
       recipe_id           INTEGER REFERENCES recipes(id) ON DELETE SET NULL,
       dinner_date         DATE NOT NULL UNIQUE,
+      meal_type           TEXT,
       assigned_by_user_id INTEGER REFERENCES users(id),
       assigned_at         TIMESTAMPTZ DEFAULT NOW()
     )
   `
+  await sql`ALTER TABLE calendar_entries ADD COLUMN IF NOT EXISTS meal_type TEXT`
   console.log('✓ calendar_entries table')
 
   const [{ count }] = await sql`SELECT COUNT(*)::int AS count FROM users`

@@ -2,6 +2,11 @@ import { dateToYMD } from '../utils/dateHelpers'
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
+const MEAL_TYPE_DISPLAY = {
+  go_out: { icon: '🍽️', label: 'Going Out' },
+  order_in: { icon: '🛵', label: 'Order In' },
+}
+
 export default function DayCell({ date, entry, isPast, onAssign, onRemove }) {
   const dateStr = dateToYMD(date)
   const isToday = dateToYMD(new Date()) === dateStr
@@ -41,35 +46,56 @@ export default function DayCell({ date, entry, isPast, onAssign, onRemove }) {
             minHeight: 100,
           }}
         >
-          {imageUrl && (
-            <img
-              src={imageUrl}
-              alt={entry.recipe_name}
-              className="w-full object-cover"
-              style={{ height: 64 }}
-              onError={(e) => { e.currentTarget.style.display = 'none' }}
-            />
-          )}
-          <div className="p-2">
-            <p
-              className="text-xs font-semibold leading-tight mb-1"
-              style={{
-                fontFamily: "'Nunito', sans-serif",
-                color: '#1C1C1C',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-              }}
+          {MEAL_TYPE_DISPLAY[entry.meal_type] ? (
+            /* Go Out / Order In */
+            <div
+              className="flex flex-col items-center justify-center h-full gap-1 py-3"
+              style={{ minHeight: 100 }}
             >
-              {entry.recipe_name}
-            </p>
-            {entry.average_rating && (
-              <span style={{ color: '#C4622D', fontSize: '0.7rem' }}>
-                ★ {entry.average_rating.toFixed(1)}
+              <span style={{ fontSize: '1.8rem', lineHeight: 1 }}>
+                {MEAL_TYPE_DISPLAY[entry.meal_type].icon}
               </span>
-            )}
-          </div>
+              <p
+                className="text-xs font-semibold text-center px-1"
+                style={{ fontFamily: "'Nunito', sans-serif", color: '#1C1C1C', margin: 0 }}
+              >
+                {MEAL_TYPE_DISPLAY[entry.meal_type].label}
+              </p>
+            </div>
+          ) : (
+            /* Cook Dinner (recipe) */
+            <>
+              {imageUrl && (
+                <img
+                  src={imageUrl}
+                  alt={entry.recipe_name}
+                  className="w-full object-cover"
+                  style={{ height: 64 }}
+                  onError={(e) => { e.currentTarget.style.display = 'none' }}
+                />
+              )}
+              <div className="p-2">
+                <p
+                  className="text-xs font-semibold leading-tight mb-1"
+                  style={{
+                    fontFamily: "'Nunito', sans-serif",
+                    color: '#1C1C1C',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {entry.recipe_name}
+                </p>
+                {entry.average_rating && (
+                  <span style={{ color: '#C4622D', fontSize: '0.7rem' }}>
+                    ★ {entry.average_rating.toFixed(1)}
+                  </span>
+                )}
+              </div>
+            </>
+          )}
 
           {!isPast && (
             <div className="absolute top-1 right-1 flex gap-1">

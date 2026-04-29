@@ -13,6 +13,7 @@ export default async function handler(req, res) {
         ce.id,
         ce.dinner_date,
         ce.recipe_id,
+        ce.meal_type,
         ce.assigned_by_user_id,
         ce.assigned_at,
         r.name AS recipe_name,
@@ -30,17 +31,16 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const { recipe_id, dinner_date, assigned_by_user_id } = await parseBody(req)
-    if (!recipe_id || !dinner_date) {
-      return res.status(400).json({ error: 'recipe_id and dinner_date are required' })
-    }
+    const { recipe_id, dinner_date, assigned_by_user_id, meal_type } = await parseBody(req)
+    if (!dinner_date) return res.status(400).json({ error: 'dinner_date is required' })
 
     const [entry] = await sql`
-      INSERT INTO calendar_entries (recipe_id, dinner_date, assigned_by_user_id)
-      VALUES (${recipe_id}, ${dinner_date}, ${assigned_by_user_id ?? null})
+      INSERT INTO calendar_entries (recipe_id, dinner_date, meal_type, assigned_by_user_id)
+      VALUES (${recipe_id ?? null}, ${dinner_date}, ${meal_type ?? null}, ${assigned_by_user_id ?? null})
       ON CONFLICT (dinner_date)
       DO UPDATE SET
         recipe_id           = EXCLUDED.recipe_id,
+        meal_type           = EXCLUDED.meal_type,
         assigned_by_user_id = EXCLUDED.assigned_by_user_id,
         assigned_at         = NOW()
       RETURNING *
