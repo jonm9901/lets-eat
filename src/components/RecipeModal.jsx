@@ -29,6 +29,10 @@ export default function RecipeModal({ recipe, onClose, onSave }) {
   }, [recipe])
 
   function handleFileSelect(file) {
+    if (file.size > 4.5 * 1024 * 1024) {
+      showToast('Image must be under 4.5 MB', 'error')
+      return
+    }
     setImageFile(file)
     setImagePreview(URL.createObjectURL(file))
   }
@@ -64,9 +68,11 @@ export default function RecipeModal({ recipe, onClose, onSave }) {
 
       // Upload photo if a new file was selected
       if (imageTab === 'upload' && imageFile) {
-        const formData = new FormData()
-        formData.append('file', imageFile)
-        await axios.post(`/api/recipes/${savedRecipe.id}/image`, formData)
+        await axios.post(
+          `/api/recipes/${savedRecipe.id}/image?filename=${encodeURIComponent(imageFile.name)}`,
+          imageFile,
+          { headers: { 'Content-Type': imageFile.type } }
+        )
       }
 
       // Auto image: try OG scrape first, then fall back to Pexels
@@ -75,13 +81,13 @@ export default function RecipeModal({ recipe, onClose, onSave }) {
         try {
           if (linkUrl.trim()) {
             const { data: ogData } = await axios.get(
-              `/api/recipes/og-image?url=${encodeURIComponent(linkUrl.trim())}`
+              `/api/recipes/images?type=og&url=${encodeURIComponent(linkUrl.trim())}`
             )
             if (ogData.og_image_url) autoImageUrl = ogData.og_image_url
           }
           if (!autoImageUrl && name.trim()) {
             const { data: pexelsData } = await axios.get(
-              `/api/recipes/search-image?q=${encodeURIComponent(name.trim())}`
+              `/api/recipes/images?type=pexels&q=${encodeURIComponent(name.trim())}`
             )
             if (pexelsData.image_url) autoImageUrl = pexelsData.image_url
           }
@@ -96,8 +102,13 @@ export default function RecipeModal({ recipe, onClose, onSave }) {
       showToast(isEdit ? 'Recipe updated!' : 'Recipe saved! 🍽️')
       onSave()
       onClose()
-    } catch {
-      showToast('Failed to save recipe', 'error')
+    } catch (err) {
+      const errData = err?.response?.data
+      const msg = (typeof errData?.error === 'string' ? errData.error : null)
+        || err?.message
+        || 'Unknown error'
+      showToast(`Failed to save recipe: ${msg}`, 'error')
+      console.error('Save recipe error:', err)
     } finally {
       setLoading(false)
     }
